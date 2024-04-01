@@ -1,0 +1,17 @@
+#RUN PROG - KINDA LIKE MAKE
+
+procedure main()
+
+system("./unicon -c am01.icn am02.icn amas.icn")
+
+system("./unicon -o amdo am01.u am02.u amas.u")
+
+system("./amdo")
+
+return()
+
+end
+
+
+
+

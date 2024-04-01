@@ -1,0 +1,216 @@
+#AM looper/concatenator
+
+link graphics
+link lists
+link random
+link printf
+link io
+link eval
+link image
+link ivalue
+link gettext
+link wopen
+link xcompat
+link color
+link numbers
+link options
+link button
+link dsetup
+link evmux
+link usage
+link strings
+link exprfile
+link regexp
+link calls
+link evallist
+
+import gui
+$include "guih.icn"
+$include "keysyms.icn"
+
+procedure main(w)
+
+ w := open("ADAPTIVE MANIPULATOR", "gl", "size=800,600", "bg=black")
+
+log(w)
+
+legend(w)
+
+WAttrib(w,"dx=1", "dy=1")
+
+        Fg(w,"green")
+
+         WWrite(w,"ADAPTIVE MANIPULATOR")      
+
+   #set initial position values for camera
+
+    x := 1
+     y := 7.5
+      z := 11.5
+
+      xx := 1.5
+      yy := 4.5
+      zz := 0 
+   
+     xxx := 0     
+    yyy := 1
+   zzz := 0
+
+    i := 0.5  #global increment
+
+ repeat{
+
+   #  1,7.5,11.5 ,1.5,4.5,0, 0,1,0
+   #  0 8 30 0 3 0 0 1 0
+   s := Eye(w,x,y,z,xx,yy,zz,xxx,yyy,zzz)
+     
+     case Event(w) of {
+
+      #basic keyboard functions
+	  	       
+         Key_Down : z +:= i 
+         Key_Up : z -:= i
+         "a" : x +:= i
+         "s" : x -:= i  # fix turn-check others vvv or delete nonuse
+         "e" : y +:= i 
+
+         "r" : y -:= i
+
+         "g" : zz +:= i 
+         "h" : zz -:= i
+         Key_Right : xx +:= i
+         Key_Left : xx -:= i
+         "d" : yy +:= i
+         "f" : yy -:= i
+
+         "o" : zzz +:= i 
+         "p" : zzz -:= i
+         "u" : xxx +:= i
+         "i" : xxx -:= i
+         "t" : yyy +:= i
+         "y" : yyy -:= i
+
+         "!" : play(w)
+         "(" : playmeter1(w)
+         ")" : playmeter2(w)
+         "@" : makelist(w)
+         "#" : makelist2(w) 
+         "$" : conlist(w) 
+         "%" : l2sf(w)
+         "^" : l2mf(w)
+         "&" : conlist2(w)
+         "*" : eq(w)
+         "+" : es(w)
+         "," : mainz(w)
+         "{" : erase(w)
+         "[" : mainx()
+         
+       } 
+
+ }
+
+every q := Eye(w) do {   #set back to s?
+   write(q) #this will give you a printout of xyz values on the command line
+
+}
+
+return(w)
+
+end
+
+procedure mainz(w) #main ui
+
+WAttrib(w,"pick=on") #pick off???
+ WSection(w)
+  WSection(w,"pm1") 
+   Fg(w,"diffuse red") 
+   DrawCube(w,0.0,2.5,1.5,0.5) 
+   WSection(w)
+   WSection(w,"pm2") 
+   Fg(w,"emission blue") 
+   DrawCube(w,1.5,2.5,1.5,0.5)
+   WSection(w)
+   WSection(w,"cl") 
+   Fg(w,"diffuse green") 
+   DrawCube(w,3,2.5,1.5,0.5)
+   WSection(w)
+   WSection(w,"l2s") 
+   Fg(w,"diffuse yellow") 
+   DrawCube(w,4.5,2.5,1.5,0.5) 
+   WSection(w)
+   WSection(w,"l2m") 
+   Fg(w,"diffuse orange") 
+   DrawCube(w,0.0,2.5,3,0.5)
+   WSection(w)
+   WSection(w,"l4m") 
+   Fg(w,"diffuse magenta") 
+   DrawCube(w,1.5,2.5,3,0.5)
+   WSection(w)
+   WSection(w,"eq") 
+   Fg(w,"diffuse yellow orange") 
+   DrawCube(w,3,2.5,3,0.5)
+   WSection(w)
+   WSection(w,"xst") 
+  Fg(w,"diffuse blue green") 
+ DrawCube(w,4.5,2.5,3,0.5)
+WSection(w)
+
+inptexpln(w,-50,20,-10, 50,20,-10, 50,-20,-10, -50,-20,-10, 1) #for back image
+
+inptexpln(w,-1,2.5,0,5.5,2.5,0,5.5,2.5,4,-1,2.5,4,1)
+inptexpln(w,-1,8,0, 5.5,8,0, 5.5,2.5,0, -1,2.5,0, 3)
+Fg(w,"translucent black") 
+inptexpln(w,-1,8,4, 5.5,8,4, 5.5,2.5,4, -1,2.5,4, 2)
+
+#Refresh(w) 
+repeat{ 
+case e:=Event(w) of { 
+".":{return} #"q"|"\e":{return}
+&lpress:{ 
+write(w,"mouseclick") 
+every item:=&pick do { 
+#write(w,"on part:",item) 
+if item == "pm1" then playmeter1(w)
+if item == "pm2" then playmeter2(w)
+if item == "cl" then tedit(w)
+if item == "l2s" then l2sf(w) #mystery?
+if item == "l2m" then l2mf(w) #2track
+if item == "l4m" then conlist2(w) #change?
+if item == "eq" then eq(w)
+if item == "xst" then es(w)
+return(w)
+} 
+} 
+} 
+} 
+return(w)
+
+end
+
+procedure inptexpln(w,px,py,pz,pxx,pyy,pzz,pxxx,pyyy,pzzz,pxxxx,pyyyy,pzzzz,tex)
+
+   WAttrib(w,"texmode=on")
+
+   WAttrib(w,"texture="||(tex)||".png","texcoord=0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0")
+
+   FillPolygon(w,0+px,0+py,0+pz,0+pxx,0+pyy,0+pzz,0+pxxx,0+pyyy,0+pzzz,0+pxxxx,0+pyyyy,0+pzzzz)
+
+   WAttrib(w,"texmode=off") 
+
+#return()
+
+end
+
+procedure erase(w)
+
+WAttrib(w,"dx=200", "dy=1")
+
+EraseArea(w,0,0,200,600)
+
+end
+
+
+
+
+
+

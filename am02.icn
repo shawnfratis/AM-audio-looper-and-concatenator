@@ -1,0 +1,246 @@
+#AM looper/concatenator
+
+procedure log(w) #creates log file in LUFS. Use for visualizer?
+ cmd1 := "./ffmpeg -nostats -i tfinal.wav -filter_complex ebur128 -f null - 2>   log.txt"
+ b := system(cmd1)
+end
+
+procedure playmeter1(w) #play w meter
+ Fg(w,"red")
+  WWrite(w,"Play using meter 1")
+   Fg(w,"green")
+    WWrite(w,"Enter file name")
+    dx := WRead(w)
+    cmd1 := "./ffplay -f lavfi -i \"amovie="||dx||",ebur128=video=1:meter=18    [out0][out1]\""
+  b := system(cmd1)
+ return(w)
+end
+
+procedure playmeter2(w) #play w meter
+ Fg(w,"red")
+  WWrite(w,"Play using meter 2")
+   Fg(w,"green")
+    WWrite(w,"Enter file name")
+    dx := WRead(w)
+    cmd1 := "./ffplay -f lavfi -i \"amovie="||dx||",asplit[out0],showwaves[out1]"
+   dx||",showvolume=b=4:f=0:ds=log:c=VOLUME:w=720:h=68"
+  b := system(cmd1)
+ return(w)
+end
+
+procedure play(w) #plays w/o meter
+ Fg(w,"red")
+  WWrite(w,"Play no meter")
+   Fg(w,"green")
+   WWrite(w,"Enter file name")
+   dx := WRead(w)
+   cmd := "./ffplay.exe "||dx||""	
+  b := system(cmd) 
+ return(w)
+end
+
+procedure makelist(w) #make files
+ WWrite(w,"Enter file name")
+  dd := WRead(w)
+  system("type nul > "||dd||".txt") 
+ return(w)
+end
+
+procedure makelist2(w) #object data 2 files
+ WWrite(w,"Enter txt file name then file names")
+  dx := WRead(w)
+   repeat {    
+   dd := WRead(w) 
+   every (f := open(dx||".txt","a")) | write(f,dd)# | close
+   case Event(w) of {
+   "*" : break(w)
+   } 
+   }
+  close
+ return(w) 
+end
+
+procedure conlist(w) #concatenate lists/wav files
+ Fg(w,"red")
+  WWrite(w,"Concatenate list")
+   WWrite(w,"Outputs to output1.wav")
+   WWrite(w,"Enter txt file name")
+   dd := WRead(w)
+   cmd := "./ffmpeg -f concat -safe 0 -i "||dd||".txt -c copy -y output1.wav"
+  b := system(cmd)
+ return(w)
+end
+
+procedure l2sf(w) #need more file inputs? this is now 4track
+ WWrite(w,"4 track stereo recorder")
+  WWrite(w,"Outputs to output2.wav")
+   WWrite(w,"Enter 1st file name")
+   dx := WRead(w)
+   WWrite(w,"Enter 2nd file name")
+   dd := WRead(w)
+   WWrite(w,"Enter 3rd file name")
+   dq := WRead(w)
+   WWrite(w,"Enter 4th file name")
+   dz := WRead(w)
+   cmd := "./ffmpeg -i "||dx||" -i "||dd||" -i "||dq||" -i "||dz||" -filter_complex    amix=inputs=4:duration=longest -y output2.wav"
+  b := system(cmd)
+ return(w)
+end
+
+procedure l2mf(w) #need more file inputs
+ Fg(w,"red")
+  WWrite(w,"2 track recorder")
+   WWrite(w,"Outputs to output3.wav")
+   Fg(w,"green")
+   WWrite(w,"Enter 1st file name")
+   dx := WRead(w)
+   WWrite(w,"Enter 2nd file name")
+   dd := WRead(w)
+   cmd := "ffmpeg -i "||dx||" -i "||dd||" -filter_complex    join=inputs=2:channel_layout=stereo -y output3.wav"
+  b := system(cmd)
+ return(w)
+end
+
+procedure l4mf(w) #need more file inputs....not used?
+ Fg(w,"red")
+  WWrite(w,"4 track recorder")
+   WWrite(w,"Outputs to output4.wav")
+   Fg(w,"green")
+   WWrite(w,"Enter 1st file name")
+   dx := WRead(w)
+   WWrite(w,"Enter 2nd file name")
+   dd := WRead(w)
+   WWrite(w,"Enter 3nd file name")
+   dq := WRead(w)
+   WWrite(w,"Enter 4th file name")
+   dz := WRead(w)
+   cmd := "ffmpeg -i "||dx||" -i "||dd||" -i "||dq||" -i "||dz||" -filter_complex    join=inputs=4:channel_layout=stereo -y output4.wav"
+  b := system(cmd) #set back to join?
+ return(w)
+end
+
+procedure eq(w) #adjust eq
+ Fg(w,"red")
+  WWrite(w,"Equalizer")
+   WWrite(w,"Outputs to output5.wav")
+   Fg(w,"green")
+   WWrite(w,"EQ:Enter file name")
+   dx := WRead(w)
+   WWrite(w,"EQ:Enter db/-10")
+   dy := WRead(w)
+   WWrite(w,"EQ:Enter Hz/1000")
+   dz := WRead(w)
+   WWrite(w,"EQ:Enter bw(Hz)/200")
+   dq := WRead(w)
+   cmd := "ffmpeg -i "||dx||" -filter_complex equalizer=f="||dz||":t=h:width="||  dq||":g="||dy||" -y output5.wav"
+ b := system(cmd)
+end
+
+procedure es(w) #add stereo effect
+ Fg(w,"red")
+  WWrite(w,1,1,"Extrastereo")
+   WWrite(w,1,1,"Outputs to output6.wav")
+   Fg(w,"green")
+   WWrite(w,1,1,"EQ:Enter file name")
+   dx := WRead(w)
+   #WWrite(w,"EQ:Enter db/-10")
+   #dy := WRead(w)
+   #WWrite(w,"EQ:Enter Hz/1000")
+   #dz := WRead(w)
+   #WWrite(w,"EQ:Enter bw(Hz)/200")
+   #dq := WRead(w)
+   cmd := "ffmpeg -i "||dx||" -filter_complex extrastereo -y output6.wav"
+  b := system(cmd)
+ return(w)
+end
+
+#################################################################
+
+procedure tedit(w)
+ system("amas3.exe")
+end
+
+procedure conlist2(w) #concatenate to final mix
+ Fg(w,"red")
+  WWrite(w,"Concatenate lists")
+   WWrite(w,"Outputs to t1,t2,t3,t4 .wav")
+   WWrite(w,"Enter to initiate")
+   dd := WRead(w)
+   cmd := "./ffmpeg -f concat -safe 0 -i t1.txt -c copy -y t1.wav"
+   a := system(cmd)
+   cmd := "./ffmpeg -f concat -safe 0 -i t2.txt -c copy -y t2.wav"
+   b := system(cmd)
+   cmd := "./ffmpeg -f concat -safe 0 -i t3.txt -c copy -y t3.wav"
+   c := system(cmd)
+   cmd := "./ffmpeg -f concat -safe 0 -i t4.txt -c copy -y t4.wav"
+   d := system(cmd)
+  l2sf2(w)
+ return(w)
+end
+
+procedure l2sf2(w)
+ cmd := "./ffmpeg -i t1.wav -i t2.wav -i t3.wav -i t4.wav -filter_complex   amix=inputs=4:duration=longest -y tfinal.wav"
+  b := system(cmd)
+ return(w)
+end
+
+#################################################################
+
+procedure legend(w) #creates window w/basic commands
+
+w := open("AM", "gl", "size=300,400", "bg=black")
+
+WAttrib(w,"pos=820,10")
+
+WAttrib(w,"dx=1", "dy=1")
+
+	Fg(w,"yellow")
+    
+	 WWrite(w,"First \",\" then \".\" for 3d screen")
+	 WWrite(w,"Use \",\" each time you use 3d screen")
+	 WWrite(w,"click on 3d screen first")
+
+	 WWrite(w,"! : Play (no meter)")
+	 WWrite(w,"( : Play with meter 1")
+	 WWrite(w,") : Play with meter 2")
+	 WWrite(w,"@ : Create list name") 
+	 WWrite(w,"# : Fill list") 
+	 WWrite(w,"$ : Concatenate list")
+	 WWrite(w,"% : Layer 4 stereo files")
+	 WWrite(w,"^ : Layer 2 stereo files")
+	 WWrite(w,"& : Full 4 track render from files")
+	 WWrite(w,"* : Eq")
+	 WWrite(w,"+ : Extrastereo")
+	 WWrite(w,"text format:file 'lm01.wav'")
+         WWrite(w,"[ : Open Loop Assembler ")
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
